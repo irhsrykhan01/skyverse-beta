@@ -1,0 +1,28 @@
+{
+  "name": "skyverse",
+  "version": "1.0.0",
+  "description": "SkyVerse - Stage 1: A production-ready WhatsApp Multi-Device bot framework built on Baileys.",
+  "type": "module",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.23",
+    "axios": "^1.7.7",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "file-type": "^19.5.0",
+    "fs-extra": "^11.2.0",
+    "lowdb": "^7.0.1",
+    "mime-types": "^2.1.35",
+    "moment-timezone": "^0.5.45",
+    "pino": "^9.3.2",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
