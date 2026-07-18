@@ -15,19 +15,44 @@ export async function loadCommands(logger) {
 
   for (const file of files) {
     const fileUrl = pathToFileURL(path.join(commandsDir, file)).href;
-    const mod = await import(fileUrl);
+
+    // A single broken plugin (syntax error, throwing top-level code, bad import)
+    // must never take down the whole bot — isolate the import per file.
+    let mod;
+    try {
+      mod = await import(fileUrl);
+    } catch (err) {
+      logger.warn(`Failed to load command file "${file}": ${err.message}`);
+      continue;
+    }
+
     const command = mod.default;
 
-    if (!command || typeof command.name !== 'string' || typeof command.execute !== 'function') {
+    if (!command || typeof command.name !== 'string' || !command.name.trim() || typeof command.execute !== 'function') {
       logger.warn(`Skipping invalid command file: ${file}`);
       continue;
     }
 
-    commands.set(command.name, command);
+    const key = command.name.toLowerCase();
+
+    if (commands.has(key)) {
+      logger.warn(`Duplicate command name "${key}" in ${file} — keeping the first one loaded.`);
+      continue;
+    }
+
+    commands.set(key, command);
 
     if (Array.isArray(command.aliases)) {
       for (const alias of command.aliases) {
-        aliases.set(alias, command.name);
+        if (typeof alias !== 'string' || !alias.trim()) continue;
+
+        const aliasKey = alias.toLowerCase();
+        if (aliases.has(aliasKey) || commands.has(aliasKey)) {
+          logger.warn(`Duplicate alias "${aliasKey}" in ${file} — skipping this alias.`);
+          continue;
+        }
+
+        aliases.set(aliasKey, key);
       }
     }
   }
